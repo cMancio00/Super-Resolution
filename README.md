@@ -5,31 +5,50 @@ The aim image a super-resolution is to reconstruct a high-resolution image from 
 We will use the architecture presentend in:
 [Enhanced Deep Residual Networks for Single Image Super-Resolution](https://arxiv.org/pdf/1707.02921) (Lim et all 2017).
 
-# Deep Neural Network.
+# Install the requirements and the kernel
 
-Generally speaking, a deep neaural network is an extention of a multilayer perceptron that has "many" hidden **layers**.
+In the project folder run the following commands:
 
-We can define a **layer** as a function:
-
-$$\underbar{y} = \sigma \left( \mathbf{W}\underbar{x} + \underbar{b}  \right)$$
-
-where:
-
-- $\underbar{y} \in \mathbf{R}^K$
-- $\mathbf{W} \in \mathbf{R}^{N \times D}$ the *wights matrix*
--  $\underbar{x} \in \mathbf{R}^D$ the *data*
-- $\underbar{b} \in \mathbf{R}^N$ the *bias*
-- $\sigma$ the *activation function* (applied element wise).
-
-$N$ is the number of neurons in a given layer, and $D$ is the dimention of the input data.
-
-As long as the dimension of a layer output matches the dimensional input of the next layer, we can connect them.
-
+```bash
+python3 -m venv .venv
+```
 > [!NOTE]
-> Just the data and the activation function is known. Bias and weights must be learned.
+> The name of the virtual environment will be the same as the name of hidden folder, 
+>in this case `.venv`.
 
-Depending on the problem we face, we have to choose an architecture and an adeguate activation function.
+The virtual environment can be activated with:
 
+```bash
+source .venv/bin/activate
+```
+The requirements can be installed with:
 
+```bash
+pip install --upgrade pip & pip install -r requirements.txt
+```
 
- 
+We just now need to make the virtual environment a Jupyter kernel.
+
+```bash
+python -Xfrozen_modules=off -m ipykernel install --user --name=super-resolution
+```
+Now you can choose `super-resolution` as a Kernel.
+
+We can see the installed kernels with:
+
+```bash
+jupyter kernelspec list
+```
+The output should be something like this:
+
+```
+Available kernels:
+  python3      /home/mancio/PycharmProjects/super-resolution/.venv/share/jupyter/kernels/python3
+  super-resolution    /home/mancio/.local/share/jupyter/kernels/super-resolution
+```
+> [!NOTE]  
+> You can remove a kernel with the following command:
+
+```bash
+jupyter kernelspec uninstall super-resolution -y
+```
