@@ -15,7 +15,7 @@ def download(path : str, dataset : str):
         ValueError: The dataset is not a valid option
     """
     if dataset not in ['airplanes']:
-        raise ValueError(f"Invalid dataset choise: {dataset}")
+        raise ValueError(f"Invalid dataset choice: {dataset}")
 
     if not os.path.exists(path):
         os.makedirs(path)
