@@ -1,5 +1,4 @@
 from torch import nn
-import torch.nn.functional as F
 
 
 class ResidualBlock(nn.Module):
@@ -15,7 +14,7 @@ class ResidualBlock(nn.Module):
         out = self.conv1(x)
         out = self.relu(out)
         out = self.conv2(out)
-        out = F.add(out, res)
+        out += res
         return out
 
 
@@ -30,3 +29,4 @@ class Upsample(nn.Module):
         out = self.conv(x)
         out = self.shuffle(out)
         return out
+

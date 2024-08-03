@@ -10,9 +10,8 @@ class SuperResolution(nn.Module):
         ])
         for _ in range(num_res_block):
             self.layers.append(ResidualBlock(num_channels))
-            self.layers.append(nn.Conv2d(num_channels, num_channels, kernel_size=3, padding=1))
-        self.layers.append(Upsample(num_channels))
-        self.layers.append(nn.Conv2d(num_channels * 4, 3, kernel_size=3, padding=1))
+        self.layers.append(Upsample(num_channels))  # Questo layer ora produce 256 canali
+        self.layers.append(nn.Conv2d(num_channels, 3, kernel_size=3, padding=1))
 
     def forward(self, x):
         for layer in self.layers:
