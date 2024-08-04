@@ -26,7 +26,7 @@ def download(path: str, dataset: str):
         move(path + "/caltech101/101_ObjectCategories/" + dataset, path)
         rmtree(path + "/caltech101")
     else:
-        print(f"Dataset {dataset} already exists.")
+        print(f"Dataset {dataset} already exists, skipping download.")
 
 
 def split_dataset(dataset: Dataset, sizes: dict[str, float]) -> list[Subset]:
