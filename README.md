@@ -1,53 +1,53 @@
 # Super-Resolution
 
-The aim image a super-resolution is to reconstruct a high-resolution image from a single low resolution image.
+The goal of this project is to reconstruct a high-resolution image from a single low-resolution image.
 
-We will use the architecture presentend in:
-[Enhanced Deep Residual Networks for Single Image Super-Resolution](https://arxiv.org/pdf/1707.02921) (Lim et all 2017).
+We will utilize the architecture presented in the paper:
+[Enhanced Deep Residual Networks for Single Image Super-Resolution](https://arxiv.org/pdf/1707.02921) (Lim et al. 2017).
 
-# Install the requirements and the kernel
+# Installation of Requirements and Kernel
 
-In the project folder run the following commands:
+In the project directory, execute the following commands:
 
 ```bash
 python3 -m venv .venv
 ```
 > [!NOTE]
-> The name of the virtual environment will be the same as the name of hidden folder, 
->in this case `.venv`.
+> The name of the virtual environment will match the name of the hidden folder, 
+> in this case, `.venv`.
 
-The virtual environment can be activated with:
+To activate the virtual environment, run:
 
 ```bash
 source .venv/bin/activate
 ```
-The requirements can be installed with:
+Next, install the required packages with:
 
 ```bash
 pip install --upgrade pip & pip install -r requirements.txt
 ```
 
-We just now need to make the virtual environment a Jupyter kernel.
+Now, we need to set up the virtual environment as a Jupyter kernel:
 
 ```bash
 python -Xfrozen_modules=off -m ipykernel install --user --name=super-resolution
 ```
-Now you can choose `super-resolution` as a Kernel.
+You can now select `super-resolution` as your kernel.
 
-We can see the installed kernels with:
+To view the installed kernels, use:
 
 ```bash
 jupyter kernelspec list
 ```
-The output should be something like this:
+The output should resemble the following:
 
 ```
 Available kernels:
   python3      /home/mancio/PycharmProjects/super-resolution/.venv/share/jupyter/kernels/python3
   super-resolution    /home/mancio/.local/share/jupyter/kernels/super-resolution
 ```
-> [!NOTE]  
-> You can remove a kernel with the following command:
+> [!TIP]  
+> To remove a kernel, you can use the following command:
 
 ```bash
 jupyter kernelspec uninstall super-resolution -y
