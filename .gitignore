@@ -1,1 +1,5 @@
 .venv/
+data/
+.vscode/
+.idea/
+**/__pycache__/
