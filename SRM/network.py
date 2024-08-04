@@ -1,5 +1,5 @@
 import numpy
-
+from tqdm import tqdm
 from SRM.modules import *
 import torch
 
@@ -41,6 +41,6 @@ class SuperResolution(nn.Module):
                 epoch_loss += loss.item()
 
             avg_loss = epoch_loss / len(train_dataloader)
-            print(f'Epoch {epoch + 1}/{epochs}, L1 Loss: {avg_loss:.6f}', end="\r")
+            print(f'Epoch {epoch + 1}/{epochs} average L1 Loss: {avg_loss:.6f}')
             losses[epoch] = avg_loss
         return losses.cpu().numpy()
