@@ -1,38 +1,74 @@
 import os
+from datetime import datetime
+import numpy as np
 import torch
 from torch.utils.data import DataLoader
-from dataset.data_preparation import download
+from dataset.data_preparation import download, split_dataset
 from dataset.super_resolution_dataset import SuperResolutionDataset
 import torchvision.transforms as transforms
-import matplotlib.pyplot as plt
+from torch import nn
+import torch.optim as optim
+from SRM.network import SuperResolution
+
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+sizes = {
+    "train": 0.5,
+    "validation": 0.3,
+    "test": 0.2
+}
+model_parameters = {
+    "num_channels": 64,
+    "num_res_block": 16
+}
+SRN = SuperResolution(**model_parameters)
+hyperparameters = {
+    "params": SRN.parameters(),
+    "lr": 1e-4,
+    "betas": (0.9, 0.999),
+    "eps": 1e-8
+}
 
 
 def main():
+    torch.manual_seed(777)
     transform = transforms.Compose([
         transforms.ToTensor()
     ])
     download("./data", "airplanes")
     root_dir = 'data/airplanes'
     dataset = SuperResolutionDataset(root_dir=root_dir, transform=transform)
-    train_dataloader = DataLoader(dataset, batch_size=16, shuffle=True)
-    save_dir = 'data/preprocessed_dataset'
-    os.makedirs(save_dir, exist_ok=True)
 
-    for i, (low_res, high_res) in enumerate(train_dataloader):
-        torch.save(low_res, os.path.join(save_dir, f'low_res_{i}.pt'))
-        torch.save(high_res, os.path.join(save_dir, f'high_res_{i}.pt'))
+    train, validation, test = split_dataset(dataset, sizes)
 
-    low_res, high_res = next(iter(train_dataloader))
-    fig, ax = plt.subplots(1, 2, figsize=(12, 6))
-    # Tensori (canali, altezza, larghezza)
-    # matplot (altezza, larghezza, canali)
-    ax[0].imshow(low_res[0].permute(1, 2, 0))
-    ax[0].set_title("Low Resolution")
+    train_dataloader = DataLoader(train, batch_size=16, shuffle=True)
+    validation_dataloader = DataLoader(validation, batch_size=16, shuffle=True)
+    test_dataloader = DataLoader(test, batch_size=16, shuffle=True)
 
-    ax[1].imshow(high_res[0].permute(1, 2, 0))
-    ax[1].set_title("High Resolution")
+    loss_fn = nn.L1Loss()
 
-    plt.show()
+    optimiser = optim.Adam(**hyperparameters)
+    training_parameters = {
+        "loss_fn": loss_fn,
+        "optimiser": optimiser,
+        "epochs": 2,
+        "train_dataloader": train_dataloader,
+        "device": device
+    }
+
+    losses = SRN.training_loop(**training_parameters)
+    os.makedirs("training_loss", exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d%H%M")
+    loss_name = f"training_loss/L1_{timestamp}.csv"
+    np.savetxt(loss_name, losses, delimiter=",")
+
+    os.makedirs("checkpoint", exist_ok=True)
+
+    model_filename = \
+        f"checkpoint/SR_c{model_parameters["num_channels"]}_" + \
+        f"rb{model_parameters["num_res_block"]}_" + \
+        f"e{training_parameters["epochs"]}_{timestamp}.pth"
+    torch.save(SRN.state_dict(), model_filename)
+    print(f'Model saved as {model_filename}')
 
 
 if __name__ == "__main__":
