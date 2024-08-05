@@ -1,7 +1,7 @@
-import numpy
-from tqdm import tqdm
+from typing import Any
 from SRM.modules import *
 import torch
+from torchmetrics.functional.image import peak_signal_noise_ratio
 
 
 class SuperResolution(nn.Module):
@@ -21,13 +21,15 @@ class SuperResolution(nn.Module):
             x = layer(x)
         return x
 
-    def training_loop(self, loss_fn, optimiser, epochs, train_dataloader, device='cpu') -> numpy.ndarray:
+    def training_loop(self, loss_fn, optimiser, epochs, train_dataloader, device='cpu') -> tuple[Any, Any]:
         losses = torch.zeros(epochs, device=device)
+        psnr = torch.zeros(epochs, device=device)
         print(f"Running on {device}")
         self.to(device)
         self.train()
         for epoch in range(epochs):
             epoch_loss = 0
+            epoch_psnr = 0
             for low_res, high_res in train_dataloader:
                 low_res = low_res.to(device)
                 high_res = high_res.to(device)
@@ -39,8 +41,11 @@ class SuperResolution(nn.Module):
                 optimiser.step()
 
                 epoch_loss += loss.item()
+                epoch_psnr += peak_signal_noise_ratio(output.detach(), high_res)
 
             avg_loss = epoch_loss / len(train_dataloader)
-            print(f'Epoch {epoch + 1}/{epochs} average L1 Loss: {avg_loss:.6f}')
+            avg_psnr = epoch_psnr / len(train_dataloader)
+            print(f'Epoch {epoch + 1}/{epochs}: Average L1 Loss: {avg_loss:.6f}, Average PSNR: {avg_psnr:.6f} db')
             losses[epoch] = avg_loss
-        return losses.cpu().numpy()
+            psnr[epoch] = avg_psnr
+        return losses.cpu().numpy(), psnr.cpu().numpy()

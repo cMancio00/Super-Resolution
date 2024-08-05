@@ -51,12 +51,12 @@ def main():
     training_parameters = {
         "loss_fn": loss_fn,
         "optimiser": optimiser,
-        "epochs": 250,
+        "epochs": 2,
         "train_dataloader": train_dataloader,
         "device": device
     }
     training_start = time.time()
-    losses = SRN.training_loop(**training_parameters)
+    losses, psnr = SRN.training_loop(**training_parameters)
     training_end = time.time()
     total_time = training_end - training_start
     hours = int(total_time // 3600)
@@ -64,10 +64,12 @@ def main():
     seconds = int(total_time % 60)
     print(f"Total training time: {hours} hours, {minutes} minutes, {seconds} seconds.")
 
-    os.makedirs("training_loss", exist_ok=True)
+    os.makedirs("training_logs", exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d%H%M")
-    loss_name = f"training_loss/L1_{timestamp}.csv"
+    loss_name = f"training_logs/{timestamp}_L1.csv"
+    psnr_name = f"training_logs/{timestamp}_psnr.csv"
     np.savetxt(loss_name, losses, delimiter=",")
+    np.savetxt(psnr_name, losses, delimiter=",")
 
     os.makedirs("checkpoint", exist_ok=True)
 
