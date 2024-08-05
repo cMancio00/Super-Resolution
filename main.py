@@ -15,20 +15,14 @@ sizes = {
     "test": 0.2
 }
 
-# Define model parameters and training hyperparameters
-model_parameters = {
-    "num_channels": 64,
-    "num_res_block": 16
-}
-
 # Define validation parameters to choose from
 validation_parameters = {
     "num_channels": [16, 32, 64],
     "num_res_block": [4, 8, 16]
 }
 
-validation_epochs = 2
-final_training_epochs = 3
+validation_epochs = 50
+final_training_epochs = 150
 
 
 def main():
