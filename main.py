@@ -51,6 +51,18 @@ def main():
         "train_dataloader": train_dataloader,
         "device": device
     }
+
+    validation_parameters = {
+        "num_channels": [2, 4],
+        "num_res_block": [1, 2]
+    }
+
+    model_selection(
+        training_parameters,
+        validation_dataloader,
+        validation_parameters
+    )
+
     training_start = time.time()
     losses, psnr = SRN.training_loop(**training_parameters)
     training_end = time.time()
