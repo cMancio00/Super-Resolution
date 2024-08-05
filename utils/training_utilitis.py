@@ -4,6 +4,7 @@ from typing import List, Dict, Any, Tuple
 
 import numpy as np
 import torch
+from torch import nn, optim
 from torch.utils.data import DataLoader
 from torchmetrics.functional.image import peak_signal_noise_ratio
 
@@ -103,15 +104,31 @@ def validate(
 
 
 def model_selection(
-        training_parameters: dict,
         validation_dataloader: DataLoader,
-        validation_parameters: dict[str, list[int]]
+        validation_parameters: dict[str, list[int]],
+        validation_epochs,
+        device
 ) -> tuple[dict[str, Any], str]:
     parameters_combinations = generate_parameters(**validation_parameters)
     best_loss = float('inf')
     for model_parameter in parameters_combinations:
         print(f"num_channels:{model_parameter["num_channels"]}, num_res_block:{model_parameter["num_res_block"]}")
         SRN = SuperResolution(**model_parameter)
+        hyperparameters = {
+            "params": SRN.parameters(),
+            "lr": 1e-4,
+            "betas": (0.9, 0.999),
+            "eps": 1e-8
+        }
+        loss_fn = nn.L1Loss()
+        optimiser = optim.Adam(**hyperparameters)
+        training_parameters = {
+            "loss_fn": loss_fn,
+            "optimiser": optimiser,
+            "epochs": validation_epochs,
+            "train_dataloader": validation_dataloader,
+            "device": device
+        }
         training_loss, training_psnr = SRN.training_loop(**training_parameters)
         avg_loss, avg_psnr = validate(SRN, validation_dataloader, training_parameters)
         print(f"{avg_loss}, {avg_psnr} db")

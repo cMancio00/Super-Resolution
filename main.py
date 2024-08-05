@@ -20,22 +20,15 @@ model_parameters = {
     "num_channels": 64,
     "num_res_block": 16
 }
-SRN = SuperResolution(**model_parameters)
-hyperparameters = {
-    "params": SRN.parameters(),
-    "lr": 1e-4,
-    "betas": (0.9, 0.999),
-    "eps": 1e-8
-}
 
 # Define validation parameters to choose from
 validation_parameters = {
-    "num_channels": [2, 4],
-    "num_res_block": [1, 2]
+    "num_channels": [16, 32, 64],
+    "num_res_block": [4, 8, 16]
 }
 
 validation_epochs = 2
-final_training_epochs = 5
+final_training_epochs = 3
 
 
 def main():
@@ -60,22 +53,12 @@ def main():
         ), batch_size=16, shuffle=True
     )
 
-    # Defining Training parameter
-    loss_fn = nn.L1Loss()
-    optimiser = optim.Adam(**hyperparameters)
-    training_parameters = {
-        "loss_fn": loss_fn,
-        "optimiser": optimiser,
-        "epochs": validation_epochs,
-        "train_dataloader": train_dataloader,
-        "device": device
-    }
-
     # Model selection
     best_parameters, checkpoint_path = model_selection(
-        training_parameters,
         validation_dataloader,
-        validation_parameters
+        validation_parameters,
+        validation_epochs,
+        device
     )
     print(f"Model selection is completed!")
 
@@ -84,9 +67,23 @@ def main():
     print(f"Loading checkpoint {checkpoint_path}...")
     best_model.load_state_dict(torch.load(checkpoint_path))
 
-    # Changing epochs and dataset for the final training
-    training_parameters["epochs"] = final_training_epochs
-    training_parameters["train_dataloader"] = final_training_dataloader
+    # Defining final Training model
+    hyperparameters = {
+        "params": best_model.parameters(),
+        "lr": 1e-4,
+        "betas": (0.9, 0.999),
+        "eps": 1e-8
+    }
+    loss_fn = nn.L1Loss()
+    optimiser = optim.Adam(**hyperparameters)
+    training_parameters = {
+        "loss_fn": loss_fn,
+        "optimiser": optimiser,
+        "epochs": final_training_epochs,
+        "train_dataloader": final_training_dataloader,
+        "device": device
+    }
+
     training_start = time.time()
     losses, psnr = best_model.training_loop(**training_parameters)
     training_end = time.time()
