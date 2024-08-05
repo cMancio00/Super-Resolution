@@ -1,15 +1,11 @@
-import os
-from datetime import datetime
-import numpy as np
-import torch
 from torch.utils.data import DataLoader
 from dataset.data_preparation import download, split_dataset
 from dataset.super_resolution_dataset import SuperResolutionDataset
 import torchvision.transforms as transforms
 from torch import nn
 import torch.optim as optim
-from SRM.network import SuperResolution
 import time
+from utils.training_utilitis import *
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 sizes = {
@@ -58,27 +54,10 @@ def main():
     training_start = time.time()
     losses, psnr = SRN.training_loop(**training_parameters)
     training_end = time.time()
-    total_time = training_end - training_start
-    hours = int(total_time // 3600)
-    minutes = int((total_time % 3600) // 60)
-    seconds = int(total_time % 60)
-    print(f"Total training time: {hours} hours, {minutes} minutes, {seconds} seconds.")
+    print(format_training_time(training_end - training_start))
 
-    os.makedirs("training_logs", exist_ok=True)
-    timestamp = datetime.now().strftime("%Y%m%d%H%M")
-    loss_name = f"training_logs/{timestamp}_L1.csv"
-    psnr_name = f"training_logs/{timestamp}_psnr.csv"
-    np.savetxt(loss_name, losses, delimiter=",")
-    np.savetxt(psnr_name, losses, delimiter=",")
-
-    os.makedirs("checkpoint", exist_ok=True)
-
-    model_filename = \
-        f"checkpoint/SR_c{model_parameters["num_channels"]}_" + \
-        f"rb{model_parameters["num_res_block"]}_" + \
-        f"e{training_parameters["epochs"]}_{timestamp}.pth"
-    torch.save(SRN.state_dict(), model_filename)
-    print(f'Model saved as {model_filename}')
+    save_training_logs(losses, psnr)
+    save_checkpoint(SRN, model_parameters, training_parameters)
 
 
 if __name__ == "__main__":
