@@ -95,6 +95,10 @@ def main():
     save_training_logs(losses, psnr)
     save_checkpoint(best_model, best_parameters, training_parameters)
 
+    # Model Assessment
+    avg_loss, avg_psnr = best_model.test(nn.L1Loss(), test_dataloader, device)
+    print(f"Test L1: {avg_loss}, PSNR {avg_psnr} db")
+
 
 if __name__ == "__main__":
     main()

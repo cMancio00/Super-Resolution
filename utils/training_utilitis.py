@@ -75,7 +75,11 @@ def generate_parameters(num_channels: list[int], num_res_block: list[int]) -> li
             num_channels, num_res_block in combinations]
 
 
-def validate(model: SRM.network.SuperResolution, validation_dataloader: DataLoader, training_parameters: dict) -> (float, float):
+def validate(
+    model: SRM.network.SuperResolution,
+    validation_dataloader: DataLoader,
+    training_parameters: dict
+) -> (float, float):
     device = training_parameters["device"]
     loss_fn = training_parameters["loss_fn"]
     model = model.to(device)

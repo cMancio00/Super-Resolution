@@ -48,3 +48,21 @@ class SuperResolution(nn.Module):
             losses[epoch] = avg_loss
             psnr[epoch] = avg_psnr
         return losses.cpu().numpy(), psnr.cpu().numpy()
+
+    def test(self, loss_fn, test_dataloader, device='cpu'):
+        self.to(device)
+        self.eval()
+        total_loss = 0.
+        psnr = 0.
+        for low_res, high_res in test_dataloader:
+            low_res = low_res.to(device)
+            high_res = high_res.to(device)
+            with torch.no_grad():
+                predicted_high_res = self(low_res)
+                loss = loss_fn(predicted_high_res, high_res)
+                total_loss += loss.item()
+                psnr += peak_signal_noise_ratio(predicted_high_res, high_res)
+
+        avg_loss = total_loss / len(test_dataloader)
+        avg_psnr = psnr / len(test_dataloader)
+        return avg_loss, avg_psnr
