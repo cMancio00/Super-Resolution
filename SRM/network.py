@@ -24,7 +24,6 @@ class SuperResolution(nn.Module):
     def training_loop(self, loss_fn, optimiser, epochs, train_dataloader, device='cpu') -> tuple[Any, Any]:
         losses = torch.zeros(epochs, device=device)
         psnr = torch.zeros(epochs, device=device)
-        print(f"Running on {device}")
         self.to(device)
         self.train()
         for epoch in range(epochs):
