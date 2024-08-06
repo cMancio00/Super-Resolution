@@ -81,6 +81,16 @@ def validate(
     validation_dataloader: DataLoader,
     training_parameters: dict
 ) -> (float, float):
+    """
+    Validate a specific model during model selection
+    Args:
+        model: model to be validated
+        validation_dataloader: validation set
+        training_parameters: training parameters of the model
+
+    Returns: Average Loss and PSNR found during validation
+
+    """
     device = training_parameters["device"]
     loss_fn = training_parameters["loss_fn"]
     model = model.to(device)
