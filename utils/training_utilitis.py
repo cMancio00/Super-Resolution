@@ -11,6 +11,7 @@ from torchmetrics.functional.image import peak_signal_noise_ratio
 import SRM.network
 from SRM.network import SuperResolution
 from itertools import product
+from colorama import Fore, Style
 
 
 def format_training_time(total_time):
@@ -45,7 +46,8 @@ def save_training_logs(losses, psnr) -> None:
     psnr_name = f"training_logs/{timestamp}_psnr.csv"
     np.savetxt(loss_name, losses, delimiter=",")
     np.savetxt(psnr_name, psnr, delimiter=",")
-    print("Logs saved in training_logs")
+    print(Fore.GREEN + "Logs saved in training_logs")
+    print(Style.RESET_ALL)
 
 
 def save_checkpoint(model: SuperResolution, model_parameters: dict, training_parameters: dict) -> str:
@@ -66,7 +68,8 @@ def save_checkpoint(model: SuperResolution, model_parameters: dict, training_par
         f"rb{model_parameters["num_res_block"]}_" + \
         f"e{training_parameters["epochs"]}_{timestamp}.pth"
     torch.save(model.state_dict(), model_filename)
-    print(f'Model saved in {model_filename}')
+    print(Fore.GREEN + f'Model saved in {model_filename}')
+    print(Style.RESET_ALL)
     return model_filename
 
 
@@ -166,9 +169,10 @@ def model_selection(
             best_training_loss = training_loss
             best_training_psnr = training_psnr
     # Print the best model found
-    print(f"Best model has num_channels:{best_model_parameters["num_channels"]}, " +
+    print(Fore.GREEN + f"Best model has num_channels:{best_model_parameters["num_channels"]}, " +
           f"num_res_block:{best_model_parameters["num_res_block"]}\n" +
           f"Got L1: {best_loss}, {best_psnr} db in validation")
+    print(Style.RESET_ALL)
     # Save best training logs and checkpoint
     save_training_logs(best_training_loss, best_training_psnr)
     checkpoint_path = save_checkpoint(best_model, best_model_parameters, training_parameters)

@@ -3,6 +3,7 @@ from dataset.data_preparation import download, split_dataset
 from dataset.super_resolution_dataset import SuperResolutionDataset
 import time
 from utils.training_utilitis import *
+from colorama import Fore, Style
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 # Define sizes for data splitting
@@ -19,14 +20,15 @@ validation_parameters = {
 }
 
 # Define training epochs (during validation loop) and final training epochs (re-training after validation)
-training_epochs = 50
-final_training_epochs = 150
+training_epochs = 1
+final_training_epochs = 2
 
 
 def main():
     torch.manual_seed(777)
 
-    print(f"Running on {device}")
+    print(Fore.GREEN + f"Running on {device}")
+    print(Style.RESET_ALL)
 
     # Download and extract the dataset
     download("./data", "airplanes")
@@ -53,12 +55,14 @@ def main():
         validation_parameters,
         device
     )
-    print(f"Model selection is completed!")
+    print(Fore.GREEN + f"Model selection is completed!")
+    print(Style.RESET_ALL)
 
     # Defining final Training model
     # Train the best model from checkpoint with train+validation dataset
     best_model = SuperResolution(**best_parameters)
-    print(f"Loading checkpoint {checkpoint_path}...")
+    print(Fore.GREEN + f"Loading checkpoint {checkpoint_path}...")
+    print(Style.RESET_ALL)
     best_model.load_state_dict(torch.load(checkpoint_path))
 
     training_parameters = generate_training_parameters(
@@ -67,14 +71,16 @@ def main():
     training_start = time.time()
     losses, psnr = best_model.training_loop(**training_parameters)
     training_end = time.time()
-    print(format_training_time(training_end - training_start))
+    print(Fore.GREEN + format_training_time(training_end - training_start))
+    print(Style.RESET_ALL)
 
     save_training_logs(losses, psnr)
     save_checkpoint(best_model, best_parameters, training_parameters)
 
     # Model Assessment
     avg_loss, avg_psnr = best_model.test(nn.L1Loss(), test_dataloader, device)
-    print(f"Test L1: {avg_loss}, PSNR {avg_psnr} db")
+    print(Fore.GREEN + f"Test L1: {avg_loss}, PSNR {avg_psnr} db")
+    print(Style.RESET_ALL)
 
 
 if __name__ == "__main__":
