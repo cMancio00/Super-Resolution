@@ -1,9 +1,6 @@
 from torch.utils.data import DataLoader
 from dataset.data_preparation import download, split_dataset
 from dataset.super_resolution_dataset import SuperResolutionDataset
-import torchvision.transforms as transforms
-from torch import nn
-import torch.optim as optim
 import time
 from utils.training_utilitis import *
 
@@ -21,26 +18,27 @@ validation_parameters = {
     "num_res_block": [4, 8, 16]
 }
 
-training_epochs = 1
-final_training_epochs = 2
+# Define training epochs (during validation loop) and final training epochs (re-training after validation)
+training_epochs = 50
+final_training_epochs = 150
 
 
 def main():
-    print(f"Running on {device}")
     torch.manual_seed(777)
-    transform = transforms.Compose([
-        transforms.ToTensor()
-    ])
+
+    print(f"Running on {device}")
+
     # Download and extract the dataset
     download("./data", "airplanes")
     root_dir = 'data/airplanes'
-    dataset = SuperResolutionDataset(root_dir=root_dir, transform=transform)
+    dataset = SuperResolutionDataset(root_dir=root_dir)
 
     # Split the dataset and make the final training dataset (to be used after model selection)
     train, validation, test = split_dataset(dataset, sizes)
     train_dataloader = DataLoader(train, batch_size=16, shuffle=True)
     validation_dataloader = DataLoader(validation, batch_size=16, shuffle=True)
     test_dataloader = DataLoader(test, batch_size=16, shuffle=True)
+    # Concatenate train and validation
     final_training_dataloader = DataLoader(
         torch.utils.data.ConcatDataset(
             [train, validation]
@@ -66,7 +64,6 @@ def main():
     training_parameters = generate_training_parameters(
         best_model, final_training_dataloader, final_training_epochs, device
     )
-
     training_start = time.time()
     losses, psnr = best_model.training_loop(**training_parameters)
     training_end = time.time()
