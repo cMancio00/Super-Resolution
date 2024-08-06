@@ -5,6 +5,12 @@ The goal of this project is to reconstruct a high-resolution image from a single
 We will utilize the architecture presented in the paper:
 [Enhanced Deep Residual Networks for Single Image Super-Resolution](https://arxiv.org/pdf/1707.02921) (Lim et al. 2017).
 
+# Export the notebook as pdf
+
+```bash
+jupyter nbconvert --to pdf notebook.ipynb --output "Model Demonstration" --LatexPreprocessor.title "Super Resolution Demonstration" --LatexPreprocessor.date "August, 2024" --LatexPreprocessor.author_names "Christian Mancini"
+```
+
 # Installation of Requirements and Kernel
 
 In the project directory, execute the following commands:
