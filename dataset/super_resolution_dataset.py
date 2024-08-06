@@ -1,19 +1,28 @@
 import os
+import torch
 from PIL import Image
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 
 
 class SuperResolutionDataset(Dataset):
-    def __init__(self, root_dir, transform=transforms.Compose([transforms.ToTensor()])):
+    def __init__(self, root_dir, transform=transforms.Compose([transforms.ToTensor()])) -> None:
         self.root_dir = root_dir
         self.transform = transform
         self.file_names = os.listdir(root_dir)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.file_names)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx) -> tuple[torch.Tensor, torch.Tensor]:
+        """
+        Split the image in low and high resolution and convert them in tensor form
+        Args:
+            idx: index of the dataset
+
+        Returns: tuple of low resolution image and high resolution image, in tensor form
+
+        """
         img_path = os.path.join(self.root_dir, self.file_names[idx])
         image = Image.open(img_path)
         low_res = image.resize((128, 64))

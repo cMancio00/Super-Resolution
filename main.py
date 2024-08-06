@@ -1,9 +1,6 @@
 from torch.utils.data import DataLoader
 from dataset.data_preparation import download, split_dataset
 from dataset.super_resolution_dataset import SuperResolutionDataset
-import torchvision.transforms as transforms
-from torch import nn
-import torch.optim as optim
 import time
 from utils.training_utilitis import *
 
@@ -21,26 +18,27 @@ validation_parameters = {
     "num_res_block": [4, 8, 16]
 }
 
-validation_epochs = 50
+# Define training epochs (during validation loop) and final training epochs (re-training after validation)
+training_epochs = 50
 final_training_epochs = 150
 
 
 def main():
-    print(f"Running on {device}")
     torch.manual_seed(777)
-    transform = transforms.Compose([
-        transforms.ToTensor()
-    ])
+
+    print(f"Running on {device}")
+
     # Download and extract the dataset
     download("./data", "airplanes")
     root_dir = 'data/airplanes'
-    dataset = SuperResolutionDataset(root_dir=root_dir, transform=transform)
+    dataset = SuperResolutionDataset(root_dir=root_dir)
 
     # Split the dataset and make the final training dataset (to be used after model selection)
     train, validation, test = split_dataset(dataset, sizes)
     train_dataloader = DataLoader(train, batch_size=16, shuffle=True)
     validation_dataloader = DataLoader(validation, batch_size=16, shuffle=True)
     test_dataloader = DataLoader(test, batch_size=16, shuffle=True)
+    # Concatenate train and validation
     final_training_dataloader = DataLoader(
         torch.utils.data.ConcatDataset(
             [train, validation]
@@ -49,35 +47,23 @@ def main():
 
     # Model selection
     best_parameters, checkpoint_path = model_selection(
+        train_dataloader,
+        training_epochs,
         validation_dataloader,
         validation_parameters,
-        validation_epochs,
         device
     )
     print(f"Model selection is completed!")
 
+    # Defining final Training model
     # Train the best model from checkpoint with train+validation dataset
     best_model = SuperResolution(**best_parameters)
     print(f"Loading checkpoint {checkpoint_path}...")
     best_model.load_state_dict(torch.load(checkpoint_path))
 
-    # Defining final Training model
-    hyperparameters = {
-        "params": best_model.parameters(),
-        "lr": 1e-4,
-        "betas": (0.9, 0.999),
-        "eps": 1e-8
-    }
-    loss_fn = nn.L1Loss()
-    optimiser = optim.Adam(**hyperparameters)
-    training_parameters = {
-        "loss_fn": loss_fn,
-        "optimiser": optimiser,
-        "epochs": final_training_epochs,
-        "train_dataloader": final_training_dataloader,
-        "device": device
-    }
-
+    training_parameters = generate_training_parameters(
+        best_model, final_training_dataloader, final_training_epochs, device
+    )
     training_start = time.time()
     losses, psnr = best_model.training_loop(**training_parameters)
     training_end = time.time()
