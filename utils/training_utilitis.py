@@ -71,6 +71,16 @@ def save_checkpoint(model: SuperResolution, model_parameters: dict, training_par
 
 
 def generate_parameters(num_channels: list[int], num_res_block: list[int]) -> list[dict[str, Any]]:
+    """
+    Generate all possible combination of parameters for the model selection.
+
+    Args:
+        num_channels: list of possible num_channels
+        num_res_block: list of possible number of residual blocks
+
+    Returns: list of dictionary with model parameters
+
+    """
     combinations = product(num_channels, num_res_block)
     return [{"num_channels": num_channels, "num_res_block": num_res_block} for
             num_channels, num_res_block in combinations]
