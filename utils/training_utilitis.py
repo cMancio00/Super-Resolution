@@ -131,7 +131,7 @@ def model_selection(
         device: str
 ) -> tuple[dict[str, Any], str]:
     """
-    Model selection given a set of parameters.
+    Select the best model given a set of parameters.
     Delegates the training of each Super Resolution model to its training method
     Args:
         train_dataloader: training set
