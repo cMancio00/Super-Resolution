@@ -1,13 +1,13 @@
 import os
 from datetime import datetime
-from typing import List, Dict, Any, Tuple
-
+from typing import Any, Dict
 import numpy as np
 import torch
 from torch import nn, optim
+from torch.nn import L1Loss
+from torch.optim import Adam
 from torch.utils.data import DataLoader
 from torchmetrics.functional.image import peak_signal_noise_ratio
-
 import SRM.network
 from SRM.network import SuperResolution
 from itertools import product
@@ -133,11 +133,22 @@ def model_selection(
           f"num_res_block:{best_model_parameters["num_res_block"]}\n" +
           f"Got L1: {best_loss}, {best_psnr} db in validation")
     save_training_logs(best_training_loss, best_training_psnr)
-    checkpoint_path = save_checkpoint(best_model,best_model_parameters,training_parameters)
+    checkpoint_path = save_checkpoint(best_model, best_model_parameters, training_parameters)
     return best_model_parameters, checkpoint_path
 
 
-def generate_training_parameters(model, train_dataloader, training_epochs, device):
+def generate_training_parameters(model: nn.Module, train_dataloader: DataLoader, training_epochs: int, device: str) -> dict[str, L1Loss | Adam | Any]:
+    """
+    Generate the dictionary used for training. It does not train the model.
+    Args:
+        model: A model to be trained
+        train_dataloader: dataset to train the model
+        training_epochs: number of epochs for training
+        device: device for computing training
+
+    Returns: The dictionary with parameters to be passed to the training method
+
+    """
     # Default hyperparameters of the paper (also ADAM defaults in pytorch)
     hyperparameters = {
         "params": model.parameters(),
@@ -155,5 +166,3 @@ def generate_training_parameters(model, train_dataloader, training_epochs, devic
         "device": device
     }
     return training_parameters
-
-
