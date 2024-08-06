@@ -130,18 +130,34 @@ def model_selection(
         validation_parameters: dict[str, list[int]],
         device: str
 ) -> tuple[dict[str, Any], str]:
+    """
+    Model selection given a set of parameters.
+    Delegates the training of each Super Resolution model to its training method
+    Args:
+        train_dataloader: training set
+        training_epochs: number of epochs for training
+        validation_dataloader: validation set
+        validation_parameters: dictionary with model parameters to validate
+        device: device for computing training
+
+    Returns: best model parameters found and the checkpoint path to the trained model
+
+    """
     # Generate all possible combination of parameters to validate (channels,resBlock)
     parameters_combinations = generate_parameters(**validation_parameters)
+
+    # Model selection loop
     best_loss = float('inf')
     for model_parameter in parameters_combinations:
         print(f"num_channels:{model_parameter["num_channels"]}, num_res_block:{model_parameter["num_res_block"]}")
-        # Create and train a model
+        # Create and train a specific model
         SRN = SuperResolution(**model_parameter)
         training_parameters = generate_training_parameters(SRN, train_dataloader, training_epochs, device)
         training_loss, training_psnr = SRN.training_loop(**training_parameters)
         # Validate the model
         avg_loss, avg_psnr = validate(SRN, validation_dataloader, training_parameters)
         print(f"{avg_loss}, {avg_psnr} db")
+        # Save the current best loss and other metrics
         if avg_loss < best_loss:
             best_loss = avg_loss
             best_psnr = avg_psnr
@@ -149,15 +165,18 @@ def model_selection(
             best_model_parameters = model_parameter
             best_training_loss = training_loss
             best_training_psnr = training_psnr
+    # Print the best model found
     print(f"Best model has num_channels:{best_model_parameters["num_channels"]}, " +
           f"num_res_block:{best_model_parameters["num_res_block"]}\n" +
           f"Got L1: {best_loss}, {best_psnr} db in validation")
+    # Save best training logs and checkpoint
     save_training_logs(best_training_loss, best_training_psnr)
     checkpoint_path = save_checkpoint(best_model, best_model_parameters, training_parameters)
     return best_model_parameters, checkpoint_path
 
 
-def generate_training_parameters(model: nn.Module, train_dataloader: DataLoader, training_epochs: int, device: str) -> dict[str, L1Loss | Adam | Any]:
+def generate_training_parameters(model: nn.Module, train_dataloader: DataLoader, training_epochs: int, device: str)\
+        -> dict[str, L1Loss | Adam | Any]:
     """
     Generate the dictionary used for training. It does not train the model.
     Args:
