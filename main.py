@@ -21,8 +21,8 @@ validation_parameters = {
     "num_res_block": [4, 8, 16]
 }
 
-validation_epochs = 50
-final_training_epochs = 150
+training_epochs = 1
+final_training_epochs = 2
 
 
 def main():
@@ -49,34 +49,23 @@ def main():
 
     # Model selection
     best_parameters, checkpoint_path = model_selection(
+        train_dataloader,
+        training_epochs,
         validation_dataloader,
         validation_parameters,
-        validation_epochs,
         device
     )
     print(f"Model selection is completed!")
 
+    # Defining final Training model
     # Train the best model from checkpoint with train+validation dataset
     best_model = SuperResolution(**best_parameters)
     print(f"Loading checkpoint {checkpoint_path}...")
     best_model.load_state_dict(torch.load(checkpoint_path))
 
-    # Defining final Training model
-    hyperparameters = {
-        "params": best_model.parameters(),
-        "lr": 1e-4,
-        "betas": (0.9, 0.999),
-        "eps": 1e-8
-    }
-    loss_fn = nn.L1Loss()
-    optimiser = optim.Adam(**hyperparameters)
-    training_parameters = {
-        "loss_fn": loss_fn,
-        "optimiser": optimiser,
-        "epochs": final_training_epochs,
-        "train_dataloader": final_training_dataloader,
-        "device": device
-    }
+    training_parameters = generate_training_parameters(
+        best_model, final_training_dataloader, final_training_epochs, device
+    )
 
     training_start = time.time()
     losses, psnr = best_model.training_loop(**training_parameters)

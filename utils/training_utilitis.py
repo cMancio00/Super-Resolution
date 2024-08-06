@@ -86,7 +86,7 @@ def validate(
     model = model.to(device)
     model.eval()
     total_loss = 0.
-    psnr = 0.
+    total_psnr = 0.
     for low_res, high_res in validation_dataloader:
         low_res = low_res.to(device)
         high_res = high_res.to(device)
@@ -95,41 +95,31 @@ def validate(
             loss = loss_fn(predicted_high_res, high_res)
 
             total_loss += loss.item()
-            psnr += peak_signal_noise_ratio(predicted_high_res, high_res)
+            total_psnr += peak_signal_noise_ratio(predicted_high_res, high_res)
 
     avg_loss = total_loss / len(validation_dataloader)
-    avg_psnr = psnr / len(validation_dataloader)
+    avg_psnr = total_psnr / len(validation_dataloader)
 
     return avg_loss, avg_psnr
 
 
 def model_selection(
+        train_dataloader: DataLoader,
+        training_epochs: int,
         validation_dataloader: DataLoader,
         validation_parameters: dict[str, list[int]],
-        validation_epochs,
-        device
+        device: str
 ) -> tuple[dict[str, Any], str]:
+    # Generate all possible combination of parameters to validate (channels,resBlock)
     parameters_combinations = generate_parameters(**validation_parameters)
     best_loss = float('inf')
     for model_parameter in parameters_combinations:
         print(f"num_channels:{model_parameter["num_channels"]}, num_res_block:{model_parameter["num_res_block"]}")
+        # Create and train a model
         SRN = SuperResolution(**model_parameter)
-        hyperparameters = {
-            "params": SRN.parameters(),
-            "lr": 1e-4,
-            "betas": (0.9, 0.999),
-            "eps": 1e-8
-        }
-        loss_fn = nn.L1Loss()
-        optimiser = optim.Adam(**hyperparameters)
-        training_parameters = {
-            "loss_fn": loss_fn,
-            "optimiser": optimiser,
-            "epochs": validation_epochs,
-            "train_dataloader": validation_dataloader,
-            "device": device
-        }
+        training_parameters = generate_training_parameters(SRN, train_dataloader, training_epochs, device)
         training_loss, training_psnr = SRN.training_loop(**training_parameters)
+        # Validate the model
         avg_loss, avg_psnr = validate(SRN, validation_dataloader, training_parameters)
         print(f"{avg_loss}, {avg_psnr} db")
         if avg_loss < best_loss:
@@ -145,5 +135,25 @@ def model_selection(
     save_training_logs(best_training_loss, best_training_psnr)
     checkpoint_path = save_checkpoint(best_model,best_model_parameters,training_parameters)
     return best_model_parameters, checkpoint_path
+
+
+def generate_training_parameters(model, train_dataloader, training_epochs, device):
+    # Default hyperparameters of the paper (also ADAM defaults in pytorch)
+    hyperparameters = {
+        "params": model.parameters(),
+        "lr": 1e-4,
+        "betas": (0.9, 0.999),
+        "eps": 1e-8
+    }
+    loss_fn = nn.L1Loss()
+    optimiser = optim.Adam(**hyperparameters)
+    training_parameters = {
+        "loss_fn": loss_fn,
+        "optimiser": optimiser,
+        "epochs": training_epochs,
+        "train_dataloader": train_dataloader,
+        "device": device
+    }
+    return training_parameters
 
 
