@@ -20,8 +20,8 @@ validation_parameters = {
 }
 
 # Define training epochs (during validation loop) and final training epochs (re-training after validation)
-training_epochs = 1
-final_training_epochs = 2
+training_epochs = 50
+final_training_epochs = 150
 
 
 def main():
