@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any
 import numpy as np
 import torch
 from torch import nn, optim
@@ -128,7 +128,7 @@ def model_selection(
         training_epochs: int,
         validation_dataloader: DataLoader,
         validation_parameters: dict[str, list[int]],
-        device: str
+        device: torch.device
 ) -> tuple[dict[str, Any], str]:
     """
     Select the best model given a set of parameters.
@@ -175,7 +175,7 @@ def model_selection(
     return best_model_parameters, checkpoint_path
 
 
-def generate_training_parameters(model: nn.Module, train_dataloader: DataLoader, training_epochs: int, device: str)\
+def generate_training_parameters(model: nn.Module, train_dataloader: DataLoader, training_epochs: int, device: torch.device)\
         -> dict[str, L1Loss | Adam | Any]:
     """
     Generate the dictionary used for training. It does not train the model.
