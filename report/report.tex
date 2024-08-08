@@ -1,0 +1,44 @@
+\documentclass[]{article}
+\usepackage{subfiles}
+\usepackage{listings}
+\usepackage{subfig}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{booktabs} 
+\usepackage{subcaption}
+\usepackage{cite}
+
+
+\lstdefinestyle{python}{
+	language=Python,
+	backgroundcolor=\color{white},
+	basicstyle=\footnotesize\ttfamily,
+	breaklines=true,
+	captionpos=b,
+	numbers=left,
+	numberstyle=\tiny\color{gray},
+	keywordstyle=\color{blue},
+	commentstyle=\color{green},
+	stringstyle=\color{red},
+}
+
+
+\title{Single Image Super Resolution}
+\author{Christian Mancini \\ 7110459 \\ christian.mancini1@stud.unifi.it}
+\date{August, 2024}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\subfile{sections/Introduction.tex}
+\subfile{sections/ManageData.tex}
+\subfile{sections/TrainingBestConfiguration.tex}
+\subfile{sections/TestTheModel.tex}
+\listoffigures
+\listoftables
+
+\end{document}
