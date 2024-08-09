@@ -5,6 +5,21 @@ The goal of this project is to reconstruct a high-resolution image from a single
 We will utilize the architecture presented in the paper:
 [Enhanced Deep Residual Networks for Single Image Super-Resolution](https://arxiv.org/pdf/1707.02921) (Lim et al. 2017).
 
+# Project structure
+
+- [checkpoint](/checkpoint/) Here you will find the state of the model.
+  
+  > [!NOTE]
+  > `SR_c64_rb8_e50_202408051714.pth` indicates that the SuperResolution model has 64 channels, 8 Residual Blocks, and has been trained for 50 epochs. This represents the state of the best model during the model selection phase. The other numbers are simply the timestamp of when the model was saved.
+- **data** This folder will be automatically created when you start the project. The dataset will be downloaded here.
+- [dataset](/dataset/) This package contains the module [data_preparation](/dataset/data_preparation.py) for downloading and splitting the dataset, as well as the module [super_resolution_dataset](/dataset/super_resolution_dataset.py), which contains the extended **Dataset** class used for the model.
+- [SRM](/SRM/) This package contains the module [modules](/SRM/modules.py), which includes the building block layers (**ResidualBlocks** and **Upsample**) for the module [network](/SRM/network.py), where the SuperResolutionNetwork is defined.
+- [utils](/utils/) This package contains some useful methods for training and the [model_selection](/utils/training_utilitis.py#L129) method.
+- **output** This folder contains the output images obtained during validation and testing.
+- [training_logs](/training_logs/) contains the CSV files of loss and PSNR for the training, both before and after validation of the best model.
+- [notebook](/notebook.ipynb) This notebook displays the main results of the model.
+- [main](/main.py) This is what needs to be run to perform all the tasks, from downloading the dataset to testing the model. A seed has been set, i.e., `777`, to ensure consistent results.
+
 # Export the notebook as pdf
 
 ```bash
