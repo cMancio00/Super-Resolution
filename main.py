@@ -63,7 +63,9 @@ def main():
     best_model = SuperResolution(**best_parameters)
     print(Fore.GREEN + f"Loading checkpoint {checkpoint_path}...")
     print(Style.RESET_ALL)
-    best_model.load_state_dict(torch.load(checkpoint_path))
+    best_model.load_state_dict(
+        torch.load(checkpoint_path,map_location=device)
+    )
 
     training_parameters = generate_training_parameters(
         best_model, final_training_dataloader, final_training_epochs, device
