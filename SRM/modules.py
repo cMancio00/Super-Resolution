@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+import numpy as np
 
 
 class ResidualBlock(nn.Module):
@@ -33,24 +34,41 @@ class Upsample(nn.Module):
 
 
 class Conv2d(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=1):
+    def __init__(self, in_channels: int, out_channels: int, kernel_size: int, padding=1, bias=True):
         super().__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size
-        self.stride = stride
         self.padding = padding
-        self.kernel = nn.Parameter(torch.rand(out_channels, in_channels, kernel_size, kernel_size))
+        self.k = 1/(in_channels * np.power(kernel_size, 2))
 
-    def forward(self, image: torch.Tensor):
-        pad = nn.ReplicationPad2d((self.padding,)*4)
-        padded_image = pad(image)
-        unfolded_image = torch.nn.functional.unfold(padded_image, kernel_size=self.kernel_size, stride=self.stride)
-        kernel_reshaped = self.kernel.view(self.out_channels, -1)
-        unfolded_output = torch.matmul(kernel_reshaped, unfolded_image)
-        output_height = (image.size(2) + 2 * self.padding - self.kernel_size) // self.stride + 1
-        output_width = (image.size(3) + 2 * self.padding - self.kernel_size) // self.stride + 1
-        return unfolded_output.view(image.size(0), self.out_channels, output_height, output_width)
+        if bias:
+            self.bias = nn.Parameter(
+                torch.empty(out_channels).uniform_(-np.sqrt(self.k),np.sqrt(self.k)))
+        else:
+            self.bias = 0
+
+        self.weight = nn.Parameter(
+            torch.empty(
+                out_channels, in_channels, kernel_size, kernel_size).uniform_(-np.sqrt(self.k),np.sqrt(self.k)))
+
+    def forward(self, image):
+        image = nn.functional.pad(image, (self.padding,) * 4, "constant", 0)
+        batch_size, in_channels, height, width = image.shape
+        out_channels, in_channels_kernel, m, n = self.weight.shape
+        if self.in_channels != in_channels:
+            raise ValueError(
+                f"Input channels are different: Declared {self.in_channels}, but got Image with {in_channels}")
+        output_height = height - m + 1
+        output_width = width - n + 1
+        new_image = torch.zeros((batch_size, out_channels, output_height, output_width))
+
+        for b in range(batch_size):
+            for c in range(out_channels):
+                for i in range(output_height):
+                    for j in range(output_width):
+                        new_image[b, c, i, j] = torch.sum(image[b, :, i:i + m, j:j + n] * self.weight[c]) + self.bias[c]
+        return new_image
 
 
 
