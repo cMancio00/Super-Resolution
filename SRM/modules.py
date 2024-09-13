@@ -3,6 +3,21 @@ from torch import nn
 import numpy as np
 
 
+def _im2col(input, kernel_size, stride=1, padding=0):
+    input_padded = torch.nn.functional.pad(input, (padding, padding, padding, padding))
+    batch_size, in_channels, height, width = input_padded.size()
+    kernel_height, kernel_width = kernel_size
+    out_height = (height - kernel_height) // stride + 1
+    out_width = (width - kernel_width) // stride + 1
+    col = torch.empty(batch_size, in_channels, kernel_height, kernel_width, out_height, out_width)
+
+    for y in range(kernel_height):
+        for x in range(kernel_width):
+            col[:, :, y, x, :, :] = input_padded[:, :, y: y + out_height * stride: stride,
+                                    x: x + out_width * stride: stride]
+
+    return col.view(batch_size, in_channels * kernel_height * kernel_width, -1)
+
 class ResidualBlock(nn.Module):
 
     def __init__(self, num_channels):
@@ -52,7 +67,26 @@ class Conv2d(nn.Module):
             torch.empty(
                 out_channels, in_channels, kernel_size, kernel_size).uniform_(-np.sqrt(self.k),np.sqrt(self.k)))
 
-    def forward(self, image):
+
+    def _conv_forward(self, input, weight, bias=None, stride=1, padding=0):
+        col = _im2col(input, weight.size()[2:], stride, padding)
+        # (out_channels, in_channels * kernel_height * kernel_width)
+        weight_col = weight.view(weight.size(0), -1)
+        out = torch.matmul(weight_col, col)
+
+        if bias is not None:
+            out += bias.view(1, -1, 1)
+
+        batch_size, out_channels = out.size(0), weight.size(0)
+        out_height = (input.size(2) + 2 * padding - weight.size(2)) // stride + 1
+        out_width = (input.size(3) + 2 * padding - weight.size(3)) // stride + 1
+        return out.view(batch_size, out_channels, out_height, out_width)
+
+    def forward(self, input):
+        return self._conv_forward(input, self.weight, self.bias, padding=self.padding)
+
+
+    def slow_forward(self, image):
         image = nn.functional.pad(image, (self.padding,) * 4, "constant", 0)
         batch_size, in_channels, height, width = image.shape
         out_channels, in_channels_kernel, m, n = self.weight.shape
@@ -78,6 +112,11 @@ class PixelShuffle(nn.Module):
 
     def forward(self, x):
         batch_size, channels, height, width = x.shape
-        return torch.reshape(x,
-                             (batch_size, channels / (self.upscale_factor**2),
-                              height*self.upscale_factor, width*self.upscale_factor))
+
+        channels //= (self.upscale_factor ** 2)
+        x = x.view(batch_size, channels, self.upscale_factor, self.upscale_factor, height, width)
+        x = x.permute(0, 1, 4, 2, 5, 3)
+        x = x.contiguous().view(batch_size, channels, height * self.upscale_factor, width * self.upscale_factor)
+
+        return x
+
