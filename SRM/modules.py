@@ -46,7 +46,7 @@ class Conv2d(nn.Module):
             self.bias = nn.Parameter(
                 torch.empty(out_channels).uniform_(-np.sqrt(self.k),np.sqrt(self.k)))
         else:
-            self.bias = 0
+            self.bias = torch.zeros(out_channels)
 
         self.weight = nn.Parameter(
             torch.empty(
