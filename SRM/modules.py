@@ -25,7 +25,7 @@ class Upsample(nn.Module):
     def __init__(self, num_channel):
         super().__init__()
         self.conv = Conv2d(num_channel, num_channel * 4, kernel_size=3, padding=1)
-        self.shuffle = nn.PixelShuffle(2)
+        self.shuffle = PixelShuffle(2)
 
     def forward(self, x):
         out = self.conv(x)
@@ -71,9 +71,13 @@ class Conv2d(nn.Module):
         return new_image
 
 
+class PixelShuffle(nn.Module):
+    def __init__(self, upscale_factor: int):
+        super().__init__()
+        self.upscale_factor = upscale_factor
 
-
-
-
-
-
+    def forward(self, x):
+        batch_size, channels, height, width = x.shape
+        return torch.reshape(x,
+                             (batch_size, channels / (self.upscale_factor**2),
+                              height*self.upscale_factor, width*self.upscale_factor))
