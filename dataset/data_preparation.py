@@ -38,8 +38,6 @@ def _random_split(dataset: Dataset, lengths: list[int]) -> list[Subset]:
 
     Returns:
         List of Subsets
-
-
     """
     if sum(lengths) != len(dataset):
         raise ValueError("Sum of input lengths does not equal the length of the input dataset!")
