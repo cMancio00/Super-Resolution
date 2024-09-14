@@ -6,10 +6,13 @@ import torchvision.transforms as transforms
 
 
 class SuperResolutionDataset(Dataset):
-    def __init__(self, root_dir, transform=transforms.Compose([transforms.ToTensor()])) -> None:
+    def __init__(self, root_dir, low_resolution=(128, 64), high_resolution=(256, 128),
+                 transform=transforms.Compose([transforms.ToTensor()])) -> None:
         self.root_dir = root_dir
         self.transform = transform
         self.file_names = os.listdir(root_dir)
+        self.low_resolution = low_resolution
+        self.high_resolution = high_resolution
 
     def __len__(self) -> int:
         return len(self.file_names)
@@ -25,8 +28,8 @@ class SuperResolutionDataset(Dataset):
         """
         img_path = os.path.join(self.root_dir, self.file_names[idx])
         image = Image.open(img_path)
-        low_res = image.resize((128, 64))
-        high_res = image.resize((256, 128))
+        low_res = image.resize(self.low_resolution)
+        high_res = image.resize(self.high_resolution)
 
         if self.transform:
             low_res = self.transform(low_res)
