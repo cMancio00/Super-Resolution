@@ -112,11 +112,7 @@ class PixelShuffle(nn.Module):
 
     def forward(self, x):
         batch_size, channels, height, width = x.shape
-
         channels //= (self.upscale_factor ** 2)
         x = x.view(batch_size, channels, self.upscale_factor, self.upscale_factor, height, width)
         x = x.permute(0, 1, 4, 2, 5, 3)
-        x = x.contiguous().view(batch_size, channels, height * self.upscale_factor, width * self.upscale_factor)
-
-        return x
-
+        return x.contiguous().view(batch_size, channels, height * self.upscale_factor, width * self.upscale_factor)
