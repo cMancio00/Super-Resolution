@@ -15,8 +15,8 @@ sizes = {
 
 # Define validation parameters to choose from
 validation_parameters = {
-    "num_channels": [64],
-    "num_res_block": [8]
+    "num_channels": [16, 32, 64],
+    "num_res_block": [4, 8, 16]
 }
 
 # Define training epochs (during validation loop) and final training epochs (re-training after validation)
