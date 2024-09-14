@@ -15,14 +15,17 @@ sizes = {
 
 # Define validation parameters to choose from
 validation_parameters = {
-    "num_channels": [16, 32, 64],
-    "num_res_block": [4, 8, 16]
+    "num_channels": [64],
+    "num_res_block": [8]
 }
 
 # Define training epochs (during validation loop) and final training epochs (re-training after validation)
 training_epochs = 50
 final_training_epochs = 150
 
+# Define low and high resolution for loading data and training
+low_res = (32,16)
+high_res = (64,32)
 
 def main():
     torch.manual_seed(777)
@@ -33,7 +36,7 @@ def main():
     # Download and extract the dataset
     download("./data", "airplanes")
     root_dir = 'data/airplanes'
-    dataset = SuperResolutionDataset(root_dir=root_dir)
+    dataset = SuperResolutionDataset(root_dir=root_dir,low_resolution=low_res,high_resolution=high_res)
 
     # Split the dataset and make the final training dataset (to be used after model selection)
     train, validation, test = split_dataset(dataset, sizes)
