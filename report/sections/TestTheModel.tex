@@ -39,10 +39,18 @@ A comparison of the results obtained from testing and validation is presented in
 	\label{tab:test_results}
 \end{table}
 \begin{figure}[H]
-	\caption{Test output}
+	\caption{Test output for large model}
 	\centering
 	\label{fig:test}
-	\includegraphics[width=\textwidth]{../images/test.png}
+	\includegraphics[width=\textwidth]{../images/test_prediction_comparison_large_model.jpg}
+\end{figure}
+
+\begin{figure}[H]
+	\caption{Test output for small model}
+	\centering
+	\label{fig:test_small}
+	\includegraphics[width=\textwidth]{../images/test_prediction_comparison_small_model.jpg}
 \end{figure}
 We focused on images of airplanes seen from the front. Even though these images had low resolution, we were able to achieve good upscaling results in a relatively short time, about 12 seconds per epoch on a 3050 Ti GPU. This shows that the model works well for improving image quality while being efficient.
+For the small model, we can also achieve inference in about 20 seconds on CPU, and the results are very satisfying, as the upscaling is more noticeable due to the very low resolution of the images.
 \end{document}
