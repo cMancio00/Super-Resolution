@@ -29,6 +29,28 @@ def download(path: str, dataset: str):
         print(f"Dataset {dataset} already exists, skipping download.")
 
 
+def _random_split(dataset: Dataset, lengths: list[int]) -> list[Subset]:
+    """
+    Utility method that simulate pytorch random split
+    Args:
+        dataset: Dataset to be split
+        lengths: List of lengths to split the dataset into
+
+    Returns:
+        List of Subsets
+    """
+    if sum(lengths) != len(dataset):
+        raise ValueError("Sum of input lengths does not equal the length of the input dataset!")
+
+    indices = torch.randperm(len(dataset)).tolist()
+    subsets = []
+    offset = 0
+    for length in lengths:
+        subset = torch.utils.data.Subset(dataset, indices[offset:offset + length])
+        subsets.append(subset)
+        offset += length
+    return subsets
+
 def split_dataset(dataset: Dataset, sizes: dict[str, float]) -> list[Subset]:
     """
         Splits a dataset into training, validation, and test sets based on the provided sizes.
@@ -52,4 +74,4 @@ def split_dataset(dataset: Dataset, sizes: dict[str, float]) -> list[Subset]:
     train_size = int(sizes["train"] * len(dataset))
     validation_size = int(sizes["validation"] * len(dataset))
     test_size = len(dataset) - train_size - validation_size
-    return torch.utils.data.random_split(dataset, [train_size, validation_size, test_size])
+    return _random_split(dataset, [train_size, validation_size, test_size])

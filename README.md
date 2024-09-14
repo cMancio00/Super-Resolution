@@ -38,7 +38,7 @@ python3 main.py
 # Export the notebook as pdf
 
 ```bash
-jupyter nbconvert --to pdf notebook.ipynb --output "ModelDemonstration" --LatexPreprocessor.title "Super Resolution Demonstration" --LatexPreprocessor.date "August, 2024" --LatexPreprocessor.author_names "Christian Mancini"
+jupyter nbconvert --to pdf notebook.ipynb --output "ModelDemonstration" --LatexPreprocessor.title "Super Resolution Demonstration" --LatexPreprocessor.date "September, 2024" --LatexPreprocessor.author_names "Christian Mancini"
 ```
 
 # Installation of Requirements and Kernel

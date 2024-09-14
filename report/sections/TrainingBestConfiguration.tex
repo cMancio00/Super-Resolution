@@ -95,29 +95,35 @@ To recap, what has been used during all the trainings is reported in Table \ref{
 	\end{tabular}
 	\label{tab:training_recap}
 \end{table}
-A visual comparison of the result of the best model in validation can be observed in Figure \ref{fig:validation}. Even if the difference in db is not marked, this model, compared to algorithmic techniques like Biliner , gives a less blurry image. 
+A visual comparison of the result of the best large model in validation can be observed in Figure \ref{fig:validation} and in Figure \ref{fig:validation_small} for the smaller model. Even if the difference in db is not marked, this model, compared to algorithmic techniques like Biliner , gives a less blurry image. 
 
 \begin{figure}[H]
-	\caption{Validation output}
+	\caption{Validation output large model}
 	\centering
 	\label{fig:validation}
-	\includegraphics[width=\textwidth]{../images/validation.png}
+	\includegraphics[width=\textwidth]{../images/validation_prediction_comparison_large_model.jpg}
+\end{figure}
+
+\begin{figure}[H]
+	\caption{Validation output small model}
+	\centering
+	\label{fig:validation_small}
+	\includegraphics[width=\textwidth]{../images/validation_prediction_comparison_small_model.jpg}
 \end{figure}
 Continuing to train the best model for an additional 150 epochs using the combined training and validation set leads to the results shown in terms of loss and PSNR, as seen in Figure \ref{fig:loss} and Figure \ref{fig:db}. The classification of image quality levels as low, medium, and high based on PSNR values is a matter of convention and does not relate to resolution; it only indicates how much the generated image differs from the original.
 \begin{figure}[H]
 	\caption{L1 Loss}
 	\centering
 	\label{fig:loss}
-	\includegraphics[width=\textwidth]{../images/loss.png}
+	\includegraphics[width=\textwidth]{../images/learning_comparison.png}
 \end{figure}
 
 \begin{figure}[H]
 	\caption{PSNR}
 	\centering
 	\label{fig:db}
-	\includegraphics[width=\textwidth]{../images/db.png}
+	\includegraphics[width=\textwidth]{../images/psnr_comparison.png}
 \end{figure}
 
 
-	
 \end{document}

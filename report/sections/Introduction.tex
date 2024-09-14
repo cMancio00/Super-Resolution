@@ -1,7 +1,12 @@
 \documentclass[../report.tex]{subfiles}
 
 \begin{document}
-	
+
+\section{Disclaimer}
+In this project, we've implemented two models with different hardware setups. The first model trained on a GPU using the standard PyTorch modules. It handles upscaling images from $128 \times 64$ to $256 \times 128$.
+The second model is trained on a CPU, where we wrote our own modules. Even though the implementations differ, both models keep the same method signatures. This means you can easily switch between them , allowing you to use checkpoints from either model interchangeably.
+For the smaller CPU model, we focused on upscaling images from $32 \times 16$ to $64 \times 32$. 
+In this report we will present the results of both models.
 \section{Introduction}
 
 The goal of a Single Image Super Resolution Network is to take a low-resolution image and enhance its resolution by a factor of 2 or more. This is a regression task. The network takes an image in tensor form as input and outputs a larger tensor based on the scaling factor. The output tensor can be converted back into an image to visualize the upscaling result.\\
@@ -53,7 +58,7 @@ class ResidualBlock(nn.Module):
 \end{lstlisting}
 
 \subsection{Upsample and Output Layer}
-The Upsample layer is the last layer responsible for increasing the dimensions of the tensor before passing it through the output convolutional layer. The implementation of the Upsample layer is shown in Listing \ref{lst:Upsample}. The component that actually performs the upscaling is the pixel shuffle operation.
+The Upsample layer is the last layer responsible for increasing the dimensions of the tensor before passing it through the output convolutional layer. The implementation of the Upsample layer is shown in Listing \ref{lst:Upsample}. The component that actually performs the upscaling is the covolutional layer that "generates" the new pixels and the PixelShuffle that rearange it with the proper dimentions.
 
 \begin{lstlisting}[style=python, language=python, label={lst:Upsample}, caption={Upsample implementation}]
 from torch import nn
